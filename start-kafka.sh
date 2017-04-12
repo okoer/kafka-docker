@@ -41,6 +41,9 @@ do
   fi
 done
 
+sed -i 's/num.partitions=1/num.partitions=30/g' $KAFKA_HOME/config/server.properties && sed -i 's/#delete.topic.enable=true/delete.topic.enable=true/g' $KAFKA_HOME/config/server.properties
+
+
 if [[ -n "$CUSTOM_INIT_SCRIPT" ]] ; then
   eval $CUSTOM_INIT_SCRIPT
 fi
