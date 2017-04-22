@@ -43,30 +43,14 @@ done
 
 #sed -i 's/num.partitions=1/num.partitions=30/g' $KAFKA_HOME/config/server.properties && sed -i 's/#delete.topic.enable=true/delete.topic.enable=true/g' $KAFKA_HOME/config/server.properties
 
+#compact=`grep compact $KAFKA_HOME/config/server.properties`
+#if [ -z "$compact" ];then
+#echo log.cleanup.policy=compact >> $KAFKA_HOME/config/server.properties
+#fi
 
 if [[ -n "$CUSTOM_INIT_SCRIPT" ]] ; then
   eval $CUSTOM_INIT_SCRIPT
 fi
 
-
-KAFKA_PID=0
-
-# see https://medium.com/@gchudnov/trapping-signals-in-docker-containers-7a57fdda7d86#.bh35ir4u5
-term_handler() {
-  echo 'Stopping Kafka....'
-  if [ $KAFKA_PID -ne 0 ]; then
-    kill -s TERM "$KAFKA_PID"
-    wait "$KAFKA_PID"
-  fi
-  echo 'Kafka stopped.'
-  exit
-}
-
-
-# Capture kill requests to stop properly
-trap "term_handler" SIGHUP SIGINT SIGTERM
 create-topics.sh &
-$KAFKA_HOME/bin/kafka-server-start.sh $KAFKA_HOME/config/server.properties &
-KAFKA_PID=$!
-
-wait "$KAFKA_PID"
+exec $KAFKA_HOME/bin/kafka-server-start.sh $KAFKA_HOME/config/server.properties
